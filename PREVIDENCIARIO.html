@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Checklist de Atendimento Previdenciário</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --card:#111827;
+    --muted:#94a3b8;
+    --text:#e5e7eb;
+    --brand:#22c55e;
+    --accent:#38bdf8;
+    --danger:#ef4444;
+    --ok:#10b981;
+    --warn:#f59e0b;
+    --border:#1f2937;
+  }
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,var(--bg),#0b1222);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text)}
+  .container{max-width:1100px;margin:32px auto;padding:0 16px}
+  .toolbar{position:sticky;top:0;z-index:20;background:rgba(15,23,42,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  .toolbar .inner{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 0}
+  .btn{border:1px solid var(--border);background:#0b1222;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:all .2s}
+  .btn:hover{transform:translateY(-1px);border-color:#2a364d}
+  .btn.brand{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:transparent;font-weight:600}
+  .btn.accent{background:linear-gradient(135deg,#38bdf8,#0ea5e9);border-color:transparent;font-weight:600}
+  .btn.warn{background:linear-gradient(135deg,#f59e0b,#d97706);border-color:transparent;font-weight:600}
+  .btn.ghost{background:transparent}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+  .card{background:linear-gradient(180deg,#0b1222,#0a1020);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .card h2{font-size:18px;margin:0}
+  .card .hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .content{padding:16px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type='text'],input[type='date'],input[type='number'],select,textarea{
+    width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0b1222;color:var(--text);
+    outline:none;transition:border .15s
+  }
+  textarea{min-height:90px}
+  input:focus,select:focus,textarea:focus{border-color:#334155}
+  .row{display:grid;gap:12px}
+  @media(min-width:780px){.row-2{grid-template-columns:1fr 1fr}.row-3{grid-template-columns:repeat(3,1fr)}.row-4{grid-template-columns:repeat(4,1fr)}}
+  .table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .table th,.table td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
+  .table th{font-size:12px;color:#a8b3c7;background:#0c1326}
+  .table tfoot td{font-weight:700}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#0b1222}
+  .check{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+  .check input{margin-top:3px}
+  .muted{color:var(--muted)}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap}
+  .kpi .box{flex:1;min-width:160px;background:#0c1326;border:1px solid var(--border);border-radius:14px;padding:12px}
+  .kpi .box b{display:block;font-size:22px;margin-top:4px}
+  .footnote{font-size:12px;color:#9aa7be}
+  .tag{font-size:11px;opacity:.8}
+  /* Print optimization */ 
+  @media print {
+    body{background:white;color:black}
+    .toolbar{display:none !important}
+    .card{border:1px solid #ddd;background:white;box-shadow:none}
+    .content input, .content select, .content textarea { border:1px solid #ddd; background:white; color:black }
+    .footnote{color:#555}
+    a[href]:after{content:''}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="container inner">
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="chip">Checklist Previdenciário</span>
+        <span class="tag">v1.1</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn brand" id="btnSave">Salvar (JSON)</button>
+        <label class="btn" for="fileLoad" style="cursor:pointer">Carregar</label>
+        <input id="fileLoad" type="file" accept="application/json" hidden>
+        <button class="btn accent" id="btnExportWord">Exportar Word (.doc)</button>
+        <button class="btn accent" id="btnPrint">Exportar PDF (Imprimir)</button>
+        <button class="btn warn" id="btnClear">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container grid">
+    <div class="card">
+      <div class="hd">
+        <h2>Resumo do Caso</h2>
+        <div class="kpi">
+          <div class="box"><span class="muted">Tempo estimado</span><b id="kpiTempo">0a 0m</b></div>
+          <div class="box"><span class="muted">Períodos especiais</span><b id="kpiEspeciais">0</b></div>
+          <div class="box"><span class="muted">Benefício-alvo</span><b id="kpiBenef">—</b></div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="row row-3">
+          <div>
+            <label>Benefício pretendido</label>
+            <select id="beneficio">
+              <option value="">Selecione…</option>
+              <option>Aposentadoria por Idade</option>
+              <option>Aposentadoria por Tempo de Contribuição</option>
+              <option>Aposentadoria Especial</option>
+              <option>Auxílio por Incapacidade Temporária</option>
+              <option>Aposentadoria por Incapacidade Permanente</option>
+              <option>Pensão por Morte</option>
+              <option>BPC/LOAS</option>
+              <option>Revisão de Benefício</option>
+            </select>
+          </div>
+          <div>
+            <label>Objetivo do atendimento</label>
+            <input type="text" id="objetivo" placeholder="Ex.: verificar elegibilidade para aposentadoria por idade"/>
+          </div>
+          <div>
+            <label>Observações iniciais</label>
+            <input type="text" id="obsIniciais" placeholder="Ex.: período rural sem registro, ação trabalhista em curso"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="hd"><h2>1) Identificação do Cliente</h2></div>
+        <div class="content">
+          <div class="row row-2">
+            <div><label>Nome completo</label><input id="nome" type="text"></div>
+            <div><label>CPF</label><input id="cpf" type="text" placeholder="000.000.000-00"></div>
+          </div>
+          <div class="row row-2">
+            <div><label>RG</label><input id="rg" type="text"></div>
+            <div><label>Data de nascimento</label><input id="nascimento" type="date"></div>
+          </div>
+          <div class="row row-2">
+            <div><label>Estado civil</label><input id="estadoCivil" type="text"></div>
+            <div><label>Nome do cônjuge/companheiro(a)</label><input id="conjuge" type="text"></div>
+          </div>
+          <div class="row">
+            <div><label>Endereço</label><input id="endereco" type="text" placeholder="Rua, nº, complemento, bairro, cidade/UF, CEP"></div>
+          </div>
+          <div class="row row-2">
+            <div><label>Telefone</label><input id="telefone" type="text" placeholder="(00) 00000-0000"></div>
+            <div><label>E-mail</label><input id="email" type="text" placeholder="nome@exemplo.com"></div>
+          </div>
+          <div class="row row-2">
+            <div><label>Escolaridade</label><input id="escolaridade" type="text"></div>
+            <div><label>Profissão atual</label><input id="profissao" type="text"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h2>2) Situação Familiar & Dependentes</h2></div>
+        <div class="content">
+          <div class="check"><input id="temUniao" type="checkbox"><label for="temUniao">Há união estável formalizada</label></div>
+          <div class="check"><input id="temFilhos" type="checkbox"><label for="temFilhos">Possui filhos menores/estudantes/inválidos</label></div>
+          <div class="check"><input id="temDeficienciaDep" type="checkbox"><label for="temDeficienciaDep">Dependente(s) com deficiência</label></div>
+          <label>Observações</label>
+          <textarea id="obsDependentes" placeholder="Liste dependentes com nome, data de nascimento, relação e observações."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">
+        <h2>3) Histórico de Contribuições e Vínculos</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="addVinculo">+ Adicionar vínculo</button>
+          <button class="btn ghost" id="importaCNIS">Importar rápido (colar CNIS)</button>
+        </div>
+      </div>
+      <div class="content">
+        <table class="table" id="tblVinculos">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Empresa / Órgão</th>
+              <th>Cargo/Função</th>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Especial?</th>
+              <th>Meses</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6" style="text-align:right">Total de meses de contribuição:</td>
+              <td id="totalMeses">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <p class="footnote">Dica: registre também períodos como autônomo/facultativo, militar, licença maternidade, auxílio-doença (conta para tempo, exceto para especial) e períodos rurais.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="hd"><h2>4) Condições Especiais / Ambientais</h2></div>
+        <div class="content">
+          <div class="check"><input id="temInsalubre" type="checkbox"><label for="temInsalubre">Trabalho com insalubridade/periculosidade (ruído, agentes químicos, eletricidade etc.)</label></div>
+          <div class="check"><input id="temPPP" type="checkbox"><label for="temPPP">Possui PPP/LTCAT</label></div>
+          <div class="check"><input id="temCAT" type="checkbox"><label for="temCAT">Há CAT registrada</label></div>
+          <label>Detalhes / agentes nocivos</label>
+          <textarea id="obsEspeciais" placeholder="Descrever setores, EPIs, medições, NEN (ruído), tensão elétrica, agentes químicos/biológicos."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h2>5) Saúde e Incapacidade</h2></div>
+        <div class="content">
+          <div class="check"><input id="temDoenca" type="checkbox"><label for="temDoenca">Há doença/lesão que reduza a capacidade laboral</label></div>
+          <div class="check"><input id="benefIncapacidade" type="checkbox"><label for="benefIncapacidade">Já recebeu benefício por incapacidade</label></div>
+          <label>Laudos e exames (resumo)</label>
+          <textarea id="obsSaude" placeholder="Descrever diagnósticos (CID), tratamentos, limitações funcionais, datas de afastamento."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd"><h2>6) Documentos Necessários</h2></div>
+      <div class="content">
+        <div class="row row-3">
+          <div>
+            <span class="muted">Sugestão por benefício</span>
+            <div id="docSugestoes" class="footnote">Selecione um benefício para gerar uma lista base.</div>
+          </div>
+          <div>
+            <button class="btn" id="btnMarcarTodos">Marcar todos</button>
+          </div>
+          <div>
+            <button class="btn" id="btnDesmarcarTodos">Desmarcar todos</button>
+          </div>
+        </div>
+        <div id="docs" class="grid" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd"><h2>7) Notas Finais</h2></div>
+      <div class="content">
+        <label>Resumo do atendimento</label>
+        <textarea id="resumo" placeholder="Anote o que ficou combinado, pendências de documentos, próximos passos e prazos."></textarea>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="btnCopiar">Copiar resumo</button>
+          <span class="muted" id="copyStatus"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+function diffMonths(d1, d2){
+  if(!d1 || !d2) return 0;
+  const a = new Date(d1), b = new Date(d2);
+  if (isNaN(a) || isNaN(b)) return 0;
+  let months = (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth());
+  if (b.getDate() >= a.getDate()) months += 1;
+  return Math.max(0, months);
+}
+function monthsToYyMm(total){
+  const y = Math.floor(total/12), m = total%12; return `${y}a ${m}m`;
+}
+
+const tblBody = $('#tblVinculos tbody');
+const totalMesesEl = $('#totalMeses');
+const kpiTempo = $('#kpiTempo');
+const kpiEspeciais = $('#kpiEspeciais');
+
+function novaLinha(v={tipo:'CLT', empresa:'', cargo:'', ini:'', fim:'', especial:false}){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>
+      <select class="inp-tipo">
+        <option ${v.tipo==='CLT'?'selected':''}>CLT</option>
+        <option ${v.tipo==='Autônomo'?'selected':''}>Autônomo</option>
+        <option ${v.tipo==='MEI'?'selected':''}>MEI</option>
+        <option ${v.tipo==='Servidor (RPPS)'?'selected':''}>Servidor (RPPS)</option>
+        <option ${v.tipo==='Rural'?'selected':''}>Rural</option>
+        <option ${v.tipo==='Militar'?'selected':''}>Militar</option>
+        <option ${v.tipo==='Outro'?'selected':''}>Outro</option>
+      </select>
+    </td>
+    <td><input class="inp-empresa" type="text" placeholder="Empresa / Órgão" value="${v.empresa||''}"></td>
+    <td><input class="inp-cargo" type="text" placeholder="Cargo / Função" value="${v.cargo||''}"></td>
+    <td><input class="inp-ini" type="date" value="${v.ini||''}"></td>
+    <td><input class="inp-fim" type="date" value="${v.fim||''}"></td>
+    <td style="text-align:center"><input class="inp-esp" type="checkbox" ${v.especial?'checked':''}></td>
+    <td class="col-meses">0</td>
+    <td><button class="btn ghost btnDel">Excluir</button></td>`;
+  tblBody.appendChild(tr);
+  atualizarTotais();
+}
+
+function atualizarTotais(){
+  let total = 0; let esp=0;
+  $$('#tblVinculos tbody tr').forEach(tr=>{
+    const ini = $('.inp-ini', tr).value; const fim = $('.inp-fim', tr).value;
+    const m = diffMonths(ini, fim);
+    $('.col-meses', tr).textContent = m;
+    total += m;
+    if($('.inp-esp', tr).checked) esp++;
+  });
+  totalMesesEl.textContent = total;
+  kpiTempo.textContent = monthsToYyMm(total);
+  kpiEspeciais.textContent = esp;
+}
+
+$('#addVinculo').addEventListener('click', ()=> novaLinha());
+
+tblBody.addEventListener('input', (e)=>{
+  if(e.target.matches('.inp-ini,.inp-fim,.inp-esp')) atualizarTotais();
+});
+
+tblBody.addEventListener('click', (e)=>{
+  if(e.target.classList.contains('btnDel')){
+    e.target.closest('tr').remove();
+    atualizarTotais();
+  }
+});
+
+$('#importaCNIS').addEventListener('click', async ()=>{
+  const texto = prompt('Cole o texto do CNIS (ou um resumo com EMPRESA | INÍCIO | FIM):');
+  if(!texto) return;
+  const linhas = texto.split(/\n|\r/).map(s=>s.trim()).filter(Boolean);
+  const rx = /(\d{2}\/\d{2}\/\d{4})|([12]\d{3}-\d{2}-\d{2})/;
+  for(const ln of linhas){
+    const partes = ln.split(/\s+-\s+|\s+\|\s+|\t/);
+    if(partes.length>=3 && rx.test(ln)){
+      const [empresa,c1,c2] = partes;
+      const ini = normalizaData(c1); const fim = normalizaData(c2);
+      novaLinha({empresa:empresa?.toUpperCase?.()||empresa, ini, fim});
+    }
+  }
+  atualizarTotais();
+});
+
+function normalizaData(s){
+  if(!s) return '';
+  s = s.trim();
+  const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+  if(/\d{4}-\d{2}-\d{2}/.test(s)) return s;
+  return '';
+}
+
+const docsCatalogo = [
+  {grupo:'Pessoais', itens:[
+    'RG e CPF','Comprovante de residência atualizado','Certidão de nascimento/casamento','Carteira(s) de trabalho (todas as páginas)','Título de eleitor','CNH (se houver)'
+  ]},
+  {grupo:'Contribuição/Vínculos', itens:[
+    'CNIS atualizado','Carnês/Guias GPS','Holerites/contracheques','Termos de rescisão e FGTS','Comprovantes MEI (DAS)','Contrato social/CNPJ (se empresário)'
+  ]},
+  {grupo:'Ambientais/Especiais', itens:[
+    'PPP – Perfil Profissiográfico Previdenciário','LTCAT – Laudo Técnico de Condições Ambientais','CAT – Comunicação de Acidente de Trabalho'
+  ]},
+  {grupo:'Saúde', itens:[
+    'Laudos, atestados e exames','Relatórios médicos detalhados (CID, limitações)','Comprovantes de afastamentos/auxílio-doença'
+  ]},
+  {grupo:'Específicos', itens:[
+    'CTC – Certidão de Tempo de Contribuição (RPPS/Militar)','Decisões administrativas ou judiciais do INSS','Sentenças trabalhistas (reconhecimento de vínculo)','Documentos de dependentes (RG/CPF/certidões)','Certidão de óbito (pensão por morte)'
+  ]},
+  {grupo:'Assistencial (BPC/LOAS)', itens:[
+    'CadÚnico atualizado','RG/CPF de todos do grupo familiar','Comprovantes de renda/declaração de ausência','Laudo médico (deficiência)'
+  ]}
+];
+
+const docsEl = $('#docs');
+
+function renderDocs(){
+  docsEl.innerHTML = '';
+  docsCatalogo.forEach(gr=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="hd"><h2>${gr.grupo}</h2></div>`;
+    const c = document.createElement('div');
+    c.className = 'content';
+    gr.itens.forEach(item=>{
+      const id = 'doc_'+btoa(gr.grupo+item).replace(/[^a-z0-9]/gi,'');
+      const wrap = document.createElement('div');
+      wrap.className = 'check';
+      wrap.innerHTML = `<input id="${id}" type="checkbox"><label for="${id}">${item}</label>`;
+      c.appendChild(wrap);
+    });
+    card.appendChild(c);
+    docsEl.appendChild(card);
+  });
+}
+renderDocs();
+
+function sugerirPorBeneficio(val){
+  const sug = {
+    'Aposentadoria por Idade': ['CNIS atualizado','Carteira(s) de trabalho (todas as páginas)','RG e CPF','Comprovante de residência atualizado'],
+    'Aposentadoria por Tempo de Contribuição': ['CNIS atualizado','Carteira(s) de trabalho (todas as páginas)','Carnês/Guias GPS','Holerites/contracheques','CTC – Certidão de Tempo de Contribuição (RPPS/Militar)'],
+    'Aposentadoria Especial': ['PPP – Perfil Profissiográfico Previdenciário','LTCAT – Laudo Técnico de Condições Ambientais','CNIS atualizado','Holerites/contracheques','CAT – Comunicação de Acidente de Trabalho'],
+    'Auxílio por Incapacidade Temporária': ['Laudos, atestados e exames','Relatórios médicos detalhados (CID, limitações)','Comprovantes de afastamentos/auxílio-doença','CNIS atualizado'],
+    'Aposentadoria por Incapacidade Permanente': ['Laudos, atestados e exames','Relatórios médicos detalhados (CID, limitações)','CNIS atualizado'],
+    'Pensão por Morte': ['Certidão de óbito (pensão por morte)','Documentos de dependentes (RG/CPF/certidões)','CNIS atualizado','Certidão de casamento/união estável'],
+    'BPC/LOAS': ['CadÚnico atualizado','Laudo médico (deficiência)','RG/CPF de todos do grupo familiar','Comprovantes de renda/declaração de ausência'],
+    'Revisão de Benefício': ['CNIS atualizado','Decisões administrativas ou judiciais do INSS','Holerites/contracheques']
+  };
+  const itens = sug[val]||[];
+  $$('#docs input[type="checkbox"]').forEach(ch=>ch.checked=false);
+  itens.forEach(txt=>{
+    const match = $$('#docs label').find(l=>l.textContent.trim()===txt);
+    if(match){ const id = match.getAttribute('for'); const el = document.getElementById(id); if(el) el.checked = true; }
+  });
+  $('#docSugestoes').textContent = itens.length? `Sugeridos: ${itens.join(', ')}` : 'Selecione um benefício para gerar uma lista base.';
+}
+
+$('#beneficio').addEventListener('change', (e)=>{
+  $('#kpiBenef').textContent = e.target.value || '—';
+  sugerirPorBeneficio(e.target.value);
+});
+
+$('#btnMarcarTodos').addEventListener('click', ()=>{
+  $$('#docs input[type="checkbox"]').forEach(ch=>ch.checked=true);
+});
+$('#btnDesmarcarTodos').addEventListener('click', ()=>{
+  $$('#docs input[type="checkbox"]').forEach(ch=>ch.checked=false);
+});
+
+function coletaEstado(){
+  const dados = {
+    meta:{versao:'1.1', geradoEm:new Date().toISOString()},
+    resumo:{beneficio:$('#beneficio').value, objetivo:$('#objetivo').value, obs:$('#obsIniciais').value},
+    cliente:{
+      nome:$('#nome').value, cpf:$('#cpf').value, rg:$('#rg').value, nascimento:$('#nascimento').value,
+      estadoCivil:$('#estadoCivil').value, conjuge:$('#conjuge').value, endereco:$('#endereco').value,
+      telefone:$('#telefone').value, email:$('#email').value, escolaridade:$('#escolaridade').value, profissao:$('#profissao').value
+    },
+    familia:{temUniao:$('#temUniao').checked, temFilhos:$('#temFilhos').checked, temDeficienciaDep:$('#temDeficienciaDep').checked, obs:$('#obsDependentes').value},
+    especiais:{temInsalubre:$('#temInsalubre').checked, temPPP:$('#temPPP').checked, temCAT:$('#temCAT').checked, obs:$('#obsEspeciais').value},
+    saude:{temDoenca:$('#temDoenca').checked, benefIncapacidade:$('#benefIncapacidade').checked, obs:$('#obsSaude').value},
+    vinculos: $$('#tblVinculos tbody tr').map(tr=>({
+      tipo:$('.inp-tipo',tr).value, empresa:$('.inp-empresa',tr).value, cargo:$('.inp-cargo',tr).value,
+      ini:$('.inp-ini',tr).value, fim:$('.inp-fim',tr).value, especial:$('.inp-esp',tr).checked, meses:Number($('.col-meses',tr).textContent||0)
+    })),
+    docs: $$('#docs input[type="checkbox"]').map(ch=>({doc: $('label[for="'+ch.id+'"]').textContent.trim(), marcado: ch.checked})),
+    notas: $('#resumo').value,
+    calculos:{totalMeses:Number($('#totalMeses').textContent||0)}
+  };
+  return dados;
+}
+
+// Salvar/Carregar JSON
+function salvaJSON(){
+  const data = coletaEstado();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (data.cliente.nome||'checklist').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'');
+  a.download = `${nome || 'checklist'}_previdenciario.json`;
+  a.click();
+}
+
+$('#btnSave').addEventListener('click', salvaJSON);
+$('#fileLoad').addEventListener('change', async (e)=>{
+  const f = e.target.files?.[0]; if(!f) return;
+  const txt = await f.text();
+  try { const data = JSON.parse(txt); aplicaEstado(data); } catch(err){ alert('Arquivo inválido.'); }
+});
+
+function aplicaEstado(d){
+  if(!d) return;
+  $('#beneficio').value = d?.resumo?.beneficio || '';
+  $('#objetivo').value = d?.resumo?.objetivo || '';
+  $('#obsIniciais').value = d?.resumo?.obs || '';
+  $('#kpiBenef').textContent = $('#beneficio').value || '—';
+
+  const c = d.cliente||{};
+  $('#nome').value=c.nome||''; $('#cpf').value=c.cpf||''; $('#rg').value=c.rg||''; $('#nascimento').value=c.nascimento||'';
+  $('#estadoCivil').value=c.estadoCivil||''; $('#conjuge').value=c.conjuge||''; $('#endereco').value=c.endereco||'';
+  $('#telefone').value=c.telefone||''; $('#email').value=c.email||''; $('#escolaridade').value=c.escolaridade||''; $('#profissao').value=c.profissao||'';
+
+  const f = d.familia||{};
+  $('#temUniao').checked=!!f.temUniao; $('#temFilhos').checked=!!f.temFilhos; $('#temDeficienciaDep').checked=!!f.temDeficienciaDep; $('#obsDependentes').value=f.obs||'';
+
+  const e2 = d.especiais||{};
+  $('#temInsalubre').checked=!!e2.temInsalubre; $('#temPPP').checked=!!e2.temPPP; $('#temCAT').checked=!!e2.temCAT; $('#obsEspeciais').value=e2.obs||'';
+
+  const s = d.saude||{};
+  $('#temDoenca').checked=!!s.temDoenca; $('#benefIncapacidade').checked=!!s.benefIncapacidade; $('#obsSaude').value=s.obs||'';
+
+  tblBody.innerHTML='';
+  (d.vinculos||[]).forEach(v=> novaLinha(v));
+  if(!d.vinculos || d.vinculos.length===0) atualizarTotais();
+
+  renderDocs();
+  (d.docs||[]).forEach(obj=>{
+    const label = $$('#docs label').find(l=>l.textContent.trim()===obj.doc);
+    if(label){ const id=label.getAttribute('for'); const el=document.getElementById(id); if(el) el.checked = !!obj.marcardo || !!obj.marcado; }
+  });
+
+  $('#resumo').value = d.notas||'';
+  $('#totalMeses').textContent = d?.calculos?.totalMeses ?? $('#totalMeses').textContent;
+  kpiTempo.textContent = monthsToYyMm(Number($('#totalMeses').textContent||0));
+}
+
+// Exportar Word (.doc) — compatível com Word; abrir e “Salvar como .docx”
+function exportWord(){
+  const d = coletaEstado();
+  const esc = (s)=> (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const linhasVinc = d.vinculos.map(v=>`<tr><td>${esc(v.tipo)}</td><td>${esc(v.empresa)}</td><td>${esc(v.cargo)}</td><td>${esc(v.ini)}</td><td>${esc(v.fim)}</td><td>${v.especial?'Sim':'Não'}</td><td>${v.meses}</td></tr>`).join('');
+  const docsMarc = d.docs.filter(x=>x.marcado).map(x=>`<li>${esc(x.doc)}</li>`).join('');
+  const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Checklist Previdenciário</title>
+  <style>body{font-family:Calibri,Arial,sans-serif;font-size:12pt} h1{font-size:18pt} table{width:100%;border-collapse:collapse} th,td{border:1px solid #999;padding:6px} th{background:#eee}</style>
+  </head><body>
+  <h1>Checklist de Atendimento Previdenciário</h1>
+  <p><b>Benefício:</b> ${esc(d.resumo.beneficio)}<br><b>Objetivo:</b> ${esc(d.resumo.objetivo)}<br><b>Observações iniciais:</b> ${esc(d.resumo.obs)}</p>
+  <h2>Dados do Cliente</h2>
+  <p><b>Nome:</b> ${esc(d.cliente.nome)} | <b>CPF:</b> ${esc(d.cliente.cpf)} | <b>Nasc.:</b> ${esc(d.cliente.nascimento)}<br>
+  <b>Estado civil:</b> ${esc(d.cliente.estadoCivil)} | <b>Cônjuge:</b> ${esc(d.cliente.conjuge)}<br>
+  <b>Endereço:</b> ${esc(d.cliente.endereco)}<br>
+  <b>Telefone:</b> ${esc(d.cliente.telefone)} | <b>E-mail:</b> ${esc(d.cliente.email)}<br>
+  <b>Escolaridade:</b> ${esc(d.cliente.escolaridade)} | <b>Profissão:</b> ${esc(d.cliente.profissao)}</p>
+  <h2>Histórico de Contribuições (Total: ${d.calculos.totalMeses} meses / ${monthsToYyMmStr(d.calculos.totalMeses)})</h2>
+  <table><thead><tr><th>Tipo</th><th>Empresa/Órgão</th><th>Cargo</th><th>Início</th><th>Fim</th><th>Especial</th><th>Meses</th></tr></thead><tbody>${linhasVinc||'<tr><td colspan="7">(sem registros)</td></tr>'}</tbody></table>
+  <h2>Documentos Selecionados</h2>
+  <ul>${docsMarc||'<li>(nenhum selecionado)</li>'}</ul>
+  <h2>Notas</h2>
+  <p>${esc(d.notas)}</p>
+  </body></html>`;
+  const blob = new Blob([htmlDoc], {type:'application/msword'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (d.cliente.nome||'checklist').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'');
+  a.download = `${nome||'checklist'}_previdenciario.doc`;
+  a.click();
+}
+// helper de meses -> a/m (duplicado aqui porque não temos acesso à função JS do navegador)
+function monthsToYyMmStr(total){
+  const y = Math.floor((+total||0)/12), m = (+total||0)%12;
+  return `${y}a ${m}m`;
+}
+
+document.getElementById('btnExportWord').addEventListener('click', exportWord);
+
+// Exportar PDF via diálogo do navegador (impressão)
+document.getElementById('btnPrint').addEventListener('click', ()=>{
+  window.print(); // Na janela de impressão, escolha “Salvar como PDF”
+});
+
+// Limpar
+document.getElementById('btnClear').addEventListener('click', ()=>{
+  if(!confirm('Limpar todos os campos?')) return;
+  location.reload();
+});
+
+// Copiar resumo rápido
+document.getElementById('btnCopiar').addEventListener('click', async ()=>{
+  const d = coletaEstado();
+  const linhas = [];
+  linhas.push(`Benefício: ${d.resumo.beneficio||'-'}`);
+  linhas.push(`Cliente: ${d.cliente.nome||'-'} | CPF: ${d.cliente.cpf||'-'} | Nasc.: ${d.cliente.nascimento||'-'}`);
+  linhas.push(`Tempo total (estimado): ${monthsToYyMm(d.calculos.totalMeses)}`);
+  linhas.push('');
+  linhas.push('Vínculos:');
+  d.vinculos.forEach(v=> linhas.push(`- ${v.tipo} | ${v.empresa||'-'} | ${v.cargo||'-'} | ${v.ini||'?'} → ${v.fim||'?'} | ${v.meses}m ${v.especial?'(especial)':''}`));
+  linhas.push('');
+  const docs = d.docs.filter(x=>x.marcado).map(x=>x.doc);
+  linhas.push(`Docs pendentes (${docs.length}): ${docs.join('; ')}`);
+  linhas.push('');
+  linhas.push('Notas:');
+  linhas.push(d.notas||'-');
+  const texto = linhas.join('\n');
+  try{ await navigator.clipboard.writeText(texto); document.getElementById('copyStatus').textContent = 'Resumo copiado!'; setTimeout(()=>document.getElementById('copyStatus').textContent='',2500);}catch(err){ alert('Não foi possível copiar automaticamente. Selecione e copie manualmente.'); }
+});
+
+// Inicial
+novaLinha();
+</script>
+</body>
+</html>
