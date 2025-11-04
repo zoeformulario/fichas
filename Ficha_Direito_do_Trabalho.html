@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ficha – Atendimento ao Cliente – Direito do Trabalho</title>
+  <style>
+    :root{
+      --bg:#2F3B55;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --ink-soft:#4b5563;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --danger:#dc2626;
+      --muted:#e5e7eb;
+    }
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink);}
+    .container{max-width:1100px;margin:24px auto;padding:16px}
+    .card{background:var(--card);border-radius:20px;box-shadow:0 10px 24px rgba(0,0,0,.15);padding:28px}
+    h1{margin:0 0 4px 0;font-size:28px}
+    .sub{color:var(--ink-soft);font-size:14px;margin-bottom:18px}
+    h2{font-size:20px;margin:22px 0 10px 0;padding-top:6px;border-top:1px dashed var(--muted)}
+    fieldset{border:1px solid var(--muted);border-radius:14px;padding:16px;margin:14px 0}
+    legend{padding:0 8px;color:var(--ink-soft)}
+    .grid{display:grid;gap:12px}
+    .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    label{font-size:13px;color:var(--ink-soft)}
+    input[type="text"],input[type="date"],input[type="number"],input[type="email"],select,textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--muted);border-radius:10px;font-size:14px;outline:none;}
+    textarea{min-height:110px;resize:vertical}
+    .muted{color:var(--ink-soft);font-size:12px}
+    .btn{appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    .btn-ok{background:var(--ok);color:#fff}
+    .btn-warn{background:var(--warn);color:#111}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-ghost{background:#f3f4f6;color:#111827}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px}
+    .hide{display:none !important}
+    .hr{height:1px;background:var(--muted);margin:16px 0}
+    .kicker{font-weight:700;color:#111827}
+    .section-note{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px}
+    @media print{
+      body{background:#fff}
+      .card{box-shadow:none;border:0}
+      .actions,.btn{display:none!important}
+      a[href]:after{content:""}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header class="row" style="justify-content:space-between;align-items:flex-end;gap:12px">
+        <div>
+          <h1>FICHA – ATENDIMENTO AO CLIENTE</h1>
+          <div class="sub">Direito do Trabalho • <span id="stamp" class="pill">Data/Hora: —</span></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ok" id="btnPrint">Imprimir em PDF</button>
+          <button type="button" class="btn btn-warn" id="btnTxt">Exportar TXT</button>
+          <button type="button" class="btn btn-danger" id="btnClear">Limpar</button>
+        </div>
+      </header>
+
+      <form id="ficha" autocomplete="off">
+        <!-- 1 - DADOS DO CLIENTE -->
+        <h2>1 – Dados do Cliente</h2>
+        <fieldset>
+          <legend>Identificação</legend>
+          <div class="grid g-2">
+            <div><label>Nome</label><input type="text" name="cliente_nome" required></div>
+            <div><label>Sexo</label>
+              <select name="cliente_sexo" required>
+                <option value="">Selecione…</option>
+                <option>Masculino</option><option>Feminino</option><option>Outros</option>
+              </select>
+            </div>
+            <div><label>CPF</label><input type="text" name="cliente_cpf" placeholder="000.000.000-00" required></div>
+            <div><label>Identidade</label><input type="text" name="cliente_rg"></div>
+            <div><label>Profissão</label><input type="text" name="cliente_profissao"></div>
+            <div><label>Estado Civil</label>
+              <select name="cliente_estado_civil">
+                <option value="">Selecione…</option>
+                <option>Casado(a)</option><option>Solteiro(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option>
+              </select>
+            </div>
+            <div><label>Carteira de Trabalho (CTPS)</label><input type="text" name="cliente_ctps"></div>
+            <div><label>PIS</label><input type="text" name="cliente_pis"></div>
+            <div><label>Data de Nascimento</label><input type="date" name="cliente_nascimento"></div>
+            <div><label>Escolaridade</label><input type="text" name="cliente_escolaridade"></div>
+            <div><label>E-mail</label><input type="email" name="cliente_email"></div>
+            <div><label>Telefone</label><input type="text" name="cliente_telefone" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" oninput="maskPhone(this)"></div>
+            <div class="g-2" style="grid-column:1/-1;display:grid;gap:12px;grid-template-columns:2fr 1fr">
+              <div><label>Endereço</label><input type="text" name="cliente_endereco"></div>
+              <div><label>CEP</label><input type="text" name="cliente_cep" placeholder="00.000-000" maxlength="10" inputmode="numeric" oninput="maskCEP(this)"></div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-note-target="note_cliente">+ Informações relevantes</button>
+          </div>
+          <div id="note_cliente" class="section-note hide">
+            <label class="kicker">Observações livres</label>
+            <textarea name="obs_cliente" placeholder="Digite observações sem limite de caracteres"></textarea>
+          </div>
+        </fieldset>
+
+        <!-- 2 - PRINCIPAL RECLAMAÇÃO -->
+        <h2>2 – Principal Reclamação do Cliente</h2>
+        <textarea name="principal_reclamacao" placeholder="Descreva livremente, sem limite de caracteres"></textarea>
+
+        <!-- 3 - INFORMAÇÕES DA RECLAMADA -->
+        <h2>3 – Informações da Reclamada</h2>
+        <fieldset>
+          <legend>Empresa</legend>
+          <div class="grid g-2">
+            <div><label>CNPJ</label><input type="text" name="reclamada_cnpj" placeholder="00.000.000/0000-00"></div>
+            <div><label>Razão Social</label><input type="text" name="reclamada_razao"></div>
+            <div><label>Nome Fantasia (se houver)</label><input type="text" name="reclamada_fantasia"></div>
+            <div><label>Representante Legal</label><input type="text" name="reclamada_representante"></div>
+            <div><label>Quem era o seu chefe?</label><input type="text" name="reclamada_chefe"></div>
+            <div><label>Tinha alguma empresa tomadora do serviço?</label><input type="text" name="reclamada_tomadora"></div>
+          </div>
+          <div class="g-2" style="display:grid;gap:12px;grid-template-columns:2fr 1fr">
+            <div><label>Endereço</label><input type="text" name="reclamada_endereco"></div>
+            <div><label>CEP</label><input type="text" name="reclamada_cep" placeholder="00.000-000" maxlength="10" inputmode="numeric" oninput="maskCEP(this)"></div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-note-target="note_reclamada">+ Informações relevantes</button>
+          </div>
+          <div id="note_reclamada" class="section-note hide">
+            <label class="kicker">Observações livres</label>
+            <textarea name="obs_reclamada" placeholder="Digite observações sem limite de caracteres"></textarea>
+          </div>
+        </fieldset>
+
+        <!-- 4 – INFORMAÇÕES PROFISSIONAIS DO CLIENTE -->
+        <h2>4 – Informações Profissionais do Cliente</h2>
+        <fieldset>
+          <legend>Perfil</legend>
+          <div class="grid g-2">
+            <div><label>Profissão atual</label><input type="text" name="prof_atual"></div>
+            <div>
+              <label>É MEI?</label>
+              <div class="row">
+                <label class="inline"><input type="radio" name="eh_mei" value="Sim"> Sim</label>
+                <label class="inline"><input type="radio" name="eh_mei" value="Não" checked> Não</label>
+              </div>
+              <div id="mei_cnpj_wrap" class="hide" style="margin-top:8px">
+                <label>CNPJ (MEI)</label>
+                <input type="text" name="mei_cnpj" placeholder="00.000.000/0000-00">
+              </div>
+            </div>
+            <div>
+              <label>Tem filhos menores?</label>
+              <div class="row">
+                <label class="inline"><input type="radio" name="filhos_menores" value="Sim"> Sim</label>
+                <label class="inline"><input type="radio" name="filhos_menores" value="Não" checked> Não</label>
+              </div>
+              <div id="filhos_wrap" class="hide" style="margin-top:8px">
+                <div class="row" style="gap:8px;align-items:center">
+                  <label>Quantidade</label>
+                  <input type="number" name="filhos_qt" min="1" value="1" style="width:120px">
+                  <button type="button" class="btn btn-ghost" id="btnGerarIdades">Gerar campos de idade</button>
+                </div>
+                <div id="idades_container" class="grid g-3" style="margin-top:8px"></div>
+              </div>
+            </div>
+            <div>
+              <label>Suspeita de gravidez?</label>
+              <div class="row">
+                <label class="inline"><input type="radio" name="gravidez" value="Sim"> Sim</label>
+                <label class="inline"><input type="radio" name="gravidez" value="Não" checked> Não</label>
+              </div>
+            </div>
+            <div>
+              <label>Recebeu algum benefício do governo durante o contrato? (Bolsa Família, LOAS etc.)</label>
+              <div class="row">
+                <label class="inline"><input type="radio" name="beneficio_gov" value="Sim"> Sim</label>
+                <label class="inline"><input type="radio" name="beneficio_gov" value="Não" checked> Não</label>
+              </div>
+              <div id="beneficio_wrap" class="hide" style="margin-top:8px">
+                <label>Detalhe o benefício</label>
+                <textarea name="beneficio_det"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-note-target="note_profissional">+ Informações relevantes</button>
+          </div>
+          <div id="note_profissional" class="section-note hide">
+            <label class="kicker">Observações livres</label>
+            <textarea name="obs_profissional"></textarea>
+          </div>
+        </fieldset>
+
+        <!-- 4 (segunda) – INFORMAÇÕES DO CONTRATO DE TRABALHO -->
+        <h2>4 – Informações do Contrato de Trabalho</h2>
+        <fieldset>
+          <legend>Contrato</legend>
+          <div class="grid g-3">
+            <div><label>Data de admissão</label><input type="date" name="adm_admissao"></div>
+            <div><label>Data da demissão</label><input type="date" name="adm_demissao"></div>
+            <div><label>Cumpriu aviso prévio?</label>
+              <select name="adm_aviso">
+                <option value="">Selecione…</option><option>Sim</option><option>Não</option><option>Indeterminado</option>
+              </select>
+            </div>
+            <div><label>Fez exame admissional?</label><select name="adm_admissional"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Fez exame demissional?</label><select name="adm_demissional"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div>
+              <label>FGTS depositado mensalmente?</label>
+              <select name="adm_fgts" id="sel_fgts"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="fgts_valor_wrap" class="hide" style="margin-top:8px">
+                <label>Valor do FGTS atual</label>
+                <input type="text" name="fgts_valor" placeholder="Ex.: 5.000,00">
+              </div>
+            </div>
+            <div>
+              <label>Contrato registrado na CTPS?</label>
+              <select name="adm_ctps" id="sel_ctps"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="ctps_data_wrap" class="hide" style="margin-top:8px">
+                <label>Data do registro na CTPS</label>
+                <input type="date" name="ctps_data">
+              </div>
+              <div id="ctps_motivo_wrap" class="hide" style="margin-top:8px">
+                <label>Motivo da não assinatura</label>
+                <textarea name="ctps_motivo"></textarea>
+              </div>
+            </div>
+            <div style="grid-column:1/-1"><label>Descreva as funções</label><textarea name="funcoes"></textarea></div>
+            <div>
+              <label>Houve desvio de função?</label>
+              <select name="desvio_func" id="sel_desvio"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="desvio_wrap" class="hide" style="margin-top:8px"><label>Detalhes do desvio</label><textarea name="desvio_det"></textarea></div>
+            </div>
+            <div>
+              <label>Houve acúmulo de função?</label>
+              <select name="acumulo_func" id="sel_acumulo"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="acumulo_wrap" class="hide" style="margin-top:8px"><label>Detalhes do acúmulo</label><textarea name="acumulo_det"></textarea></div>
+            </div>
+            <div><label>Primeiro salário</label><input type="text" name="salario_primeiro" placeholder="Ex.: 19.000,00"></div>
+            <div><label>Último salário</label><input type="text" name="salario_ultimo" placeholder="Ex.: 19.000,00"></div>
+            <div>
+              <label>Recebia comissão?</label>
+              <select name="recebia_comissao" id="sel_comissao"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="comissao_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea name="comissao_det"></textarea></div>
+            </div>
+            <div>
+              <label>Tinha salário por fora?</label>
+              <select name="salario_fora" id="sel_por_fora"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="por_fora_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea name="por_fora_det"></textarea></div>
+            </div>
+            <div><label>Forma de pagamento do salário</label><input type="text" name="forma_pag"></div>
+            <div>
+              <label>Recebia vale transporte?</label>
+              <select name="vale_transporte"><option></option><option>Sim</option><option>Não</option></select>
+            </div>
+            <div><label>Condução utilizada para o trabalho</label><input type="text" name="conducao"></div>
+            <div>
+              <label>Ficou afastado do trabalho?</label>
+              <select name="afastamento" id="sel_afast"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="afast_wrap" class="hide" style="margin-top:8px"><label>Detalhes do afastamento</label><textarea name="afast_det"></textarea></div>
+            </div>
+            <div style="grid-column:1/-1"><label>Horário de trabalho contratual</label><input type="text" name="jornada_contratual" placeholder="Ex.: 09:00–18:00, seg a sex"></div>
+            <div style="grid-column:1/-1"><label>Horário de trabalho efetivamente realizado</label><input type="text" name="jornada_real" placeholder="Descreva a realidade"></div>
+            <div><label>Havia controle de jornada?</label><select name="ctrl_jornada"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Assinava controle de jornada?</label><select name="assinava_jornada"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Controle refletia o horário real?</label><select name="refletia_real"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div>
+              <label>Era acionado fora do horário?</label>
+              <select name="acionado_fora" id="sel_acionado"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="acionado_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="acionado_det"></textarea></div>
+            </div>
+            <div>
+              <label>Ficava de sobreaviso?</label>
+              <select name="sobreaviso" id="sel_sobreaviso"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="sobreaviso_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="sobreaviso_det"></textarea></div>
+            </div>
+            <div><label>Folgas – quais dias da semana?</label><input type="text" name="folgas"></div>
+            <div>
+              <label>Trabalhava em feriados?</label>
+              <select name="feriados" id="sel_feriados"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="feriados_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="feriados_det"></textarea></div>
+            </div>
+            <div>
+              <label>Fazia intervalo intrajornada?</label>
+              <select name="intrajornada" id="sel_intra"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="intra_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="intra_det"></textarea></div>
+            </div>
+            <div>
+              <label>Trabalhava em jornada noturna?</label>
+              <select name="noturno" id="sel_noturno"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="noturno_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="noturno_det"></textarea></div>
+            </div>
+            <div>
+              <label>Recebia horas extras?</label>
+              <select name="horas_extras" id="sel_hextra"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="hextra_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="hextra_det"></textarea></div>
+            </div>
+            <div>
+              <label>Tinha banco de horas?</label>
+              <select name="banco_horas"><option></option><option>Sim</option><option>Não</option></select>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-note-target="note_contrato">+ Informações relevantes</button>
+          </div>
+          <div id="note_contrato" class="section-note hide">
+            <label class="kicker">Observações livres</label>
+            <textarea name="obs_contrato"></textarea>
+          </div>
+        </fieldset>
+
+        <!-- 5 – ANÁLISE CLT × CONTRATO -->
+        <h2>5 – Análise – CLT × Contrato de Trabalho</h2>
+        <fieldset>
+          <legend>Adicionais / Condições</legend>
+          <div class="grid g-3">
+            <div>
+              <label>Ambiente insalubre?</label>
+              <select id="sel_insalubre"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="insalubre_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebia adicional de insalubridade?</label>
+              <select id="sel_adic_ins"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="adic_ins_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Ambiente perigoso?</label>
+              <select id="sel_perigoso"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="perigoso_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebia adicional de periculosidade?</label>
+              <select id="sel_adic_perig"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="adic_perig_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label> Recebeu o PPP (Perfil Profissiográfico Previdenciário)?</label>
+              <select id="sel_ppp"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="ppp_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebeu EPI’s?</label>
+              <select id="sel_epi"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="epi_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Realizou treinamentos?</label>
+              <select id="sel_train"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="train_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>EPI’s eram substituídos com frequência?</label>
+              <select id="sel_epi_sub"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="epi_sub_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Uso do EPI era fiscalizado?</label>
+              <select id="sel_epi_fisc"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="epi_fisc_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebia adicional de periculosidade?</label>
+              <select id="sel_adic_perig2"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="adic_perig2_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebeu todo saldo de salário?</label>
+              <select id="sel_saldo"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="saldo_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebeu 13º durante a contratação?</label>
+              <select id="sel_13"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="_13_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebeu férias durante a contratação?</label>
+              <select id="sel_ferias"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="ferias_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>FGTS foi devidamente recolhido?</label>
+              <select id="sel_fgtspago"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="fgtspago_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Recebia vale alimentação?</label>
+              <select id="sel_vale_alim"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="vale_alim_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Sofreu assédio moral?</label>
+              <select id="sel_assedio"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="assedio_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+            <div>
+              <label>Outros direitos do Acordo Coletivo</label>
+              <select id="sel_outros"><option></option><option>Sim</option><option>Não</option></select>
+              <div id="outros_wrap" class="hide" style="margin-top:8px"><label>Detalhe</label><textarea></textarea></div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" data-note-target="note_analise">+ Informações relevantes</button>
+          </div>
+          <div id="note_analise" class="section-note hide"><label class="kicker">Observações livres</label><textarea name="obs_analise"></textarea></div>
+        </fieldset>
+
+        <!-- 6 – ACIDENTE DE TRABALHO -->
+        <h2>6 – Acidente de Trabalho (somente se aplicável)</h2>
+        <fieldset>
+          <legend>Acidente</legend>
+          <div class="grid g-3">
+            <div>
+              <label>Sofreu acidente de trabalho?</label>
+              <select id="sel_acidente"><option></option><option>Sim</option><option>Não</option></select>
+            </div>
+            <div id="acc_data_wrap" class="hide"><label>Data</label><input type="date" name="acc_data"></div>
+            <div id="acc_cat_wrap" class="hide"><label>Foi emitida CAT (Comunicação de Acidente de Trabalho)?</label><select name="acc_cat"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div id="acc_seq_wrap" class="hide" style="grid-column:1/-1"><label>72 – Possui sequela/limitação?</label><select id="sel_sequela"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div id="acc_seqdet_wrap" class="hide" style="grid-column:1/-1"><label>73 – Descreva a sequela</label><textarea name="acc_sequela_desc"></textarea></div>
+            <div id="acc_est_wrap" class="hide"><label>74 – Possui sequela estética?</label><select name="acc_sequela_est"><option></option><option>Sim</option><option>Não</option></select></div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions"><button type="button" class="btn btn-ghost" data-note-target="note_acidente">+ Informações relevantes</button></div>
+          <div id="note_acidente" class="section-note hide"><label class="kicker">Observações livres</label><textarea name="obs_acidente"></textarea></div>
+        </fieldset>
+
+        <!-- 7 – DETALHES DA DEMISSÃO -->
+        <h2>7 – Detalhes da Demissão</h2>
+        <fieldset>
+          <legend>Rescisão</legend>
+          <div class="grid g-3">
+            <div><label>Último salário</label><input type="text" name="res_ultimo_sal" placeholder="Ex.: 19.000,00"></div>
+            <div><label>Data da demissão</label><input type="date" name="res_data"></div>
+            <div><label>Motivo da demissão</label><input type="text" name="res_motivo"></div>
+            <div><label>Aviso prévio?</label><select name="res_aviso"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>CTPS teve baixa?</label><select name="res_ctps_baixa"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Exame demissional?</label><select name="res_exame"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Houve acerto rescisório?</label><select name="res_acerto"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Data do acerto rescisório</label><input type="date" name="res_acerto_data"></div>
+            <div><label>Recebeu documentos (TRCT, chave FGTS, seguro)?</label><select name="res_docs"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div style="grid-column:1/-1"><label>Rescisão indireta – Motivo</label><input type="text" name="res_indireta_motivo" placeholder="Se aplicável"></div>
+            <div><label>Último dia de trabalho</label><input type="date" name="res_ultimo_dia"></div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions"><button type="button" class="btn btn-ghost" data-note-target="note_demissao">+ Informações relevantes</button></div>
+          <div id="note_demissao" class="section-note hide"><label class="kicker">Observações livres</label><textarea name="obs_demissao"></textarea></div>
+        </fieldset>
+
+        <!-- 8 – DAS PROVAS -->
+        <h2>8 – Das Provas</h2>
+        <fieldset>
+          <legend>Testemunhas e Evidências</legend>
+          <div class="grid g-3">
+            <div>
+              <label>Tem testemunha?</label>
+              <select id="sel_test"><option></option><option>Sim</option><option>Não</option></select>
+            </div>
+          </div>
+          <div id="testemunhas_wrap" class="hide" style="margin-top:8px">
+            <div class="actions" style="margin-bottom:8px"><button type="button" class="btn btn-ghost" id="btnAddTest">+ Adicionar testemunha</button></div>
+            <div id="lista_testemunhas" class="grid g-2"></div>
+          </div>
+          <div class="grid g-3" style="margin-top:10px">
+            <div><label>Tem fotos/vídeos trabalhando?</label><select name="evid_midias"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Tem conversas de WhatsApp?</label><select name="evid_whats"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Documentos para provar pedidos?</label><select name="evid_docs"><option></option><option>Sim</option><option>Não</option></select></div>
+            <div><label>Postagens em redes sociais?</label><select name="evid_redes"><option></option><option>Sim</option><option>Não</option></select></div>
+          </div>
+          <div class="hr"></div>
+          <div class="actions"><button type="button" class="btn btn-ghost" data-note-target="note_provas">+ Informações relevantes</button></div>
+          <div id="note_provas" class="section-note hide"><label class="kicker">Observações livres</label><textarea name="obs_provas"></textarea></div>
+        </fieldset>
+
+        <!-- 9 – ANÁLISE DOS PEDIDOS -->
+        <h2>9 – Análise dos Pedidos</h2>
+        <fieldset>
+          <legend>Checklist</legend>
+          <div class="grid g-3" id="checks_pedidos"></div>
+          <div class="hr"></div>
+          <div class="actions"><button type="button" class="btn btn-ghost" data-note-target="note_pedidos">+ Informações relevantes</button></div>
+          <div id="note_pedidos" class="section-note hide"><label class="kicker">Observações livres</label><textarea name="obs_pedidos"></textarea></div>
+        </fieldset>
+
+        <!-- 10 – DOCUMENTAÇÃO -->
+        <h2>10 – Documentação</h2>
+        <fieldset>
+          <legend>Pendências e Outros</legend>
+          <div><label>Documentos pendentes a serem trazidos pelo cliente</label><textarea name="docs_pendentes"></textarea></div>
+
+          <div style="margin-top:10px">
+            <label>Tem algum outro colega na mesma situação?</label>
+            <select id="sel_colega"><option></option><option>Sim</option><option>Não</option></select>
+          </div>
+          <div id="colegas_wrap" class="hide" style="margin-top:8px">
+            <div class="actions" style="margin-bottom:8px"><button type="button" class="btn btn-ghost" id="btnAddColega">+ Adicionar colega</button></div>
+            <div id="lista_colegas" class="grid g-2"></div>
+          </div>
+
+          <div style="margin-top:10px">
+            <label>Teve outro contrato de trabalho que finalizou a menos de dois anos?</label>
+            <select id="sel_outro_contrato"><option></option><option>Sim</option><option>Não</option></select>
+          </div>
+          <div id="outro_contrato_wrap" class="hide" style="margin-top:8px"><label>Detalhes</label><textarea name="outro_contrato_det"></textarea></div>
+        </fieldset>
+
+        <!-- 10 (final) – INFORMAÇÕES DA CAPTAÇÃO -->
+        <h2>10 – Informações da Captação</h2>
+        <fieldset>
+          <legend>Origem</legend>
+          <div><label>Origem do cliente</label><input type="text" name="origem_cliente" placeholder="Ex.: Indicação, Redes sociais, Google…"></div>
+        </fieldset>
+      </form>
+
+      <footer class="row" style="justify-content:space-between;align-items:center;margin-top:16px">
+        <span class="muted">Fundo do formulário: <b>#2F3B55</b>. Arquivo pronto para impressão e exportação.</span>
+        <div class="actions">
+          <button type="button" class="btn btn-ok" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Voltar ao topo</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ===== UTIL =====
+  function onlyDigits(v){return v.replace(/\\D/g,'')}
+  function maskCEP(el){let v=onlyDigits(el.value).slice(0,8);v=v.replace(/(\\d{2})(\\d{3})(\\d{3})/,'$1.$2-$3');el.value=v}
+  function maskPhone(el){let v=onlyDigits(el.value).slice(0,11);if(v.length>6){v=v.replace(/(\\d{2})(\\d{5})(\\d{0,4})/,'($1) $2-$3');}else if(v.length>2){v=v.replace(/(\\d{2})(\\d{0,5})/,'($1) $2');}el.value=v}
+  window.maskCEP=maskCEP; window.maskPhone=maskPhone;
+
+  // ===== Data/Hora =====
+  function stampNow(){document.getElementById('stamp').textContent='Data/Hora: '+new Date().toLocaleString('pt-BR')}
+  stampNow();
+  document.getElementById('ficha').addEventListener('input', stampNow);
+
+  // ===== Notas por seção =====
+  document.querySelectorAll('[data-note-target]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const el=document.getElementById(btn.dataset.noteTarget);
+      el.classList.toggle('hide');
+    });
+  });
+
+  // ===== Toggle helpers =====
+  function toggleBySelect(selectId, whenValue, targetId){
+    const sel=document.getElementById(selectId), tgt=document.getElementById(targetId);
+    if(!sel||!tgt) return;
+    const update=()=>{ (sel.value===(whenValue||'Sim'))?tgt.classList.remove('hide'):tgt.classList.add('hide') }
+    sel.addEventListener('change',update); update();
+  }
+  function toggleByRadio(name, targetId){
+    const radios=[...document.querySelectorAll(`input[name="${name}"]`)], tgt=document.getElementById(targetId);
+    if(!radios.length||!tgt) return;
+    const update=()=>{ const val=radios.find(r=>r.checked)?.value; (val==='Sim')?tgt.classList.remove('hide'):tgt.classList.add('hide') }
+    radios.forEach(r=>r.addEventListener('change',update)); update();
+  }
+
+  // ===== Condicionais =====
+  toggleByRadio('eh_mei','mei_cnpj_wrap');
+  toggleByRadio('filhos_menores','filhos_wrap');
+  toggleByRadio('beneficio_gov','beneficio_wrap');
+  toggleBySelect('sel_fgts','Sim','fgts_valor_wrap');
+  (function(){const sel=document.getElementById('sel_ctps'); if(!sel) return; function upd(){const v=sel.value; document.getElementById('ctps_data_wrap').classList.toggle('hide',v!=='Sim'); document.getElementById('ctps_motivo_wrap').classList.toggle('hide',v!=='Não')} sel.addEventListener('change',upd); upd()})();
+  toggleBySelect('sel_desvio','Sim','desvio_wrap');
+  toggleBySelect('sel_acumulo','Sim','acumulo_wrap');
+  toggleBySelect('sel_comissao','Sim','comissao_wrap');
+  toggleBySelect('sel_por_fora','Sim','por_fora_wrap');
+  toggleBySelect('sel_afast','Sim','afast_wrap');
+  toggleBySelect('sel_acionado','Sim','acionado_wrap');
+  toggleBySelect('sel_sobreaviso','Sim','sobreaviso_wrap');
+  toggleBySelect('sel_feriados','Sim','feriados_wrap');
+  toggleBySelect('sel_intra','Sim','intra_wrap');
+  toggleBySelect('sel_noturno','Sim','noturno_wrap');
+  toggleBySelect('sel_hextra','Sim','hextra_wrap');
+  toggleBySelect('sel_insalubre','Sim','insalubre_wrap');
+  toggleBySelect('sel_adic_ins','Sim','adic_ins_wrap');
+  toggleBySelect('sel_perigoso','Sim','perigoso_wrap');
+  toggleBySelect('sel_adic_perig','Sim','adic_perig_wrap');
+  toggleBySelect('sel_ppp','Sim','ppp_wrap');
+  toggleBySelect('sel_epi','Sim','epi_wrap');
+  toggleBySelect('sel_train','Sim','train_wrap');
+  toggleBySelect('sel_epi_sub','Sim','epi_sub_wrap');
+  toggleBySelect('sel_epi_fisc','Sim','epi_fisc_wrap');
+  toggleBySelect('sel_adic_perig2','Sim','adic_perig2_wrap');
+  toggleBySelect('sel_saldo','Sim','saldo_wrap');
+  toggleBySelect('sel_13','Sim','_13_wrap');
+  toggleBySelect('sel_ferias','Sim','ferias_wrap');
+  toggleBySelect('sel_fgtspago','Sim','fgtspago_wrap');
+  toggleBySelect('sel_vale_alim','Sim','vale_alim_wrap');
+  toggleBySelect('sel_assedio','Sim','assedio_wrap');
+  toggleBySelect('sel_outros','Sim','outros_wrap');
+
+  // ===== Grupo 6 – Acidente de Trabalho: mostrar Data e CAT quando Sim =====
+  (function(){
+    const selAcc=document.getElementById('sel_acidente');
+    const accData=document.getElementById('acc_data_wrap');
+    const accCat=document.getElementById('acc_cat_wrap');
+    if(!selAcc) return;
+    const update=()=>{
+      if(selAcc.value==='Sim'){ accData.classList.remove('hide'); accCat.classList.remove('hide'); }
+      else { accData.classList.add('hide'); accCat.classList.add('hide'); }
+    };
+    selAcc.addEventListener('change', update); update();
+  })();
+
+  // ===== Sequela: mostrar descrição quando Sim =====
+  (function(){
+    const selSeq=document.getElementById('sel_sequela');
+    const det=document.getElementById('acc_seqdet_wrap');
+    if(!selSeq||!det) return;
+    const update=()=>{ (selSeq.value==='Sim')?det.classList.remove('hide'):det.classList.add('hide') };
+    selSeq.addEventListener('change',update); update();
+  })();
+
+  // ===== Testemunhas =====
+  const listaTest=document.getElementById('lista_testemunhas');
+  function addTestemunha(){
+    const idx=listaTest.children.length+1;
+    const wrap=document.createElement('div'); wrap.style.border='1px solid var(--muted)'; wrap.style.borderRadius='12px'; wrap.style.padding='12px';
+    wrap.innerHTML=`
+      <div class="grid g-3">
+        <div><label>Nome da testemunha</label><input type="text" name="testemunha_nome_${idx}"></div>
+        <div><label>CPF</label><input type="text" name="testemunha_cpf_${idx}" placeholder="000.000.000-00"></div>
+        <div><label>Telefone</label><input type="text" name="testemunha_tel_${idx}" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskPhone(this)"></div>
+      </div>
+      <div class="actions" style="margin-top:8px"><button type="button" class="btn btn-danger">Remover</button></div>`;
+    wrap.querySelector('button').addEventListener('click',()=>wrap.remove());
+    listaTest.appendChild(wrap);
+  }
+  document.getElementById('btnAddTest')?.addEventListener('click', addTestemunha);
+  document.getElementById('sel_test')?.addEventListener('change',e=>{
+    document.getElementById('testemunhas_wrap').classList.toggle('hide', e.target.value!=='Sim');
+    if(e.target.value==='Sim' && listaTest.children.length===0){ addTestemunha() }
+  });
+
+  // ===== Colegas =====
+  const listaCol=document.getElementById('lista_colegas');
+  function addColega(){
+    const idx=listaCol.children.length+1;
+    const wrap=document.createElement('div'); wrap.style.border='1px solid var(--muted)'; wrap.style.borderRadius='12px'; wrap.style.padding='12px';
+    wrap.innerHTML=`
+      <div class="grid g-3">
+        <div><label>Nome</label><input type="text" name="colega_nome_${idx}"></div>
+        <div><label>CPF</label><input type="text" name="colega_cpf_${idx}" placeholder="000.000.000-00"></div>
+        <div><label>Telefone</label><input type="text" name="colega_tel_${idx}" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskPhone(this)"></div>
+      </div>
+      <div class="actions" style="margin-top:8px"><button type="button" class="btn btn-danger">Remover</button></div>`;
+    wrap.querySelector('button').addEventListener('click',()=>wrap.remove());
+    listaCol.appendChild(wrap);
+  }
+  document.getElementById('btnAddColega')?.addEventListener('click', addColega);
+  document.getElementById('sel_colega')?.addEventListener('change',e=>{
+    document.getElementById('colegas_wrap').classList.toggle('hide', e.target.value!=='Sim');
+    if(e.target.value==='Sim' && listaCol.children.length===0){ addColega() }
+  });
+
+  // ===== Gerar idades dos filhos =====
+  document.getElementById('btnGerarIdades')?.addEventListener('click',()=>{
+    const n=parseInt(document.querySelector('input[name="filhos_qt"]').value||'0',10);
+    const cont=document.getElementById('idades_container'); cont.innerHTML='';
+    for(let i=1;i<=n;i++){
+      const d=document.createElement('div');
+      d.innerHTML=`<label>Idade do filho ${i}</label><input type="number" min="0" max="17" name="filho_idade_${i}">`;
+      cont.appendChild(d);
+    }
+  });
+
+  // ===== Pedidos (checkboxes) =====
+  const pedidos=['Reconhecimento de vínculo','Rescisão indireta','Horas extras e reflexos','Indenização intervalo intrajornada','Indenização intervalo interjornada','Dano moral','Reversão de justa causa','Reversão pedido de demissão em rescisão indireta','Responsabilidade solidária/subsidiária','Descanso semanal remunerado','Reconhecimento de salário oficioso','Adicional de insalubridade e reflexos','Adicional de periculosidade e reflexos','Férias','Salários trezenos','FGTS','Multa dos 40%','Multa do art. 477, § 8º CLT','Multa art. 467 CLT','Acúmulo/desvio de função','Adicional noturno'];
+  const checksWrap=document.getElementById('checks_pedidos');
+  pedidos.forEach((p,i)=>{const id='pedido_'+i; const div=document.createElement('div'); div.innerHTML=`<label class="inline"><input type="checkbox" name="${id}"> ${p}</label>`; checksWrap.appendChild(div);});
+
+  // ===== Exportar TXT =====
+  function formDataToTxt(){
+    const fd=new FormData(document.getElementById('ficha')); const lines=[];
+    lines.push('[FICHA – ATENDIMENTO – DIREITO DO TRABALHO]');
+    lines.push('Data/Hora preenchimento: '+document.getElementById('stamp').textContent.replace('Data/Hora: ','')); lines.push('');
+    for(const [k,v] of fd.entries()){ lines.push(`${k}: ${v}`) }
+    return lines.join('\n');
+  }
+  document.getElementById('btnTxt').addEventListener('click',()=>{
+    const txt=formDataToTxt(); const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ficha-atendimento-direito-trabalho.txt';
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+  });
+
+  // ===== Imprimir =====
+  document.getElementById('btnPrint').addEventListener('click',()=>window.print());
+
+  // ===== Limpar =====
+  document.getElementById('btnClear').addEventListener('click',()=>{
+    if(confirm('Tem certeza que deseja limpar todo o formulário?')){
+      document.getElementById('ficha').reset();
+      document.querySelectorAll('.section-note').forEach(el=>el.classList.add('hide'));
+      stampNow();
+    }
+  });
+})();</script>
+</body>
+</html>
